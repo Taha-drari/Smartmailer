@@ -17,6 +17,12 @@ class CampaignController extends Controller
     {
         $campaigns = Campaign::where('user_id', Auth::id())
             ->with(['template', 'emailList'])
+            ->orderByRaw("CASE 
+                WHEN status = 'pending' THEN 1 
+                WHEN status = 'processing' THEN 2 
+                WHEN status = 'completed' THEN 3 
+                ELSE 4 END")
+            ->orderBy('created_at', 'desc')
             ->get();
         return view('campaigns.index', compact('campaigns'));
     }

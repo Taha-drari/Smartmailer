@@ -1,145 +1,102 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
+        <h2 class="font-semibold text-3xl text-white leading-tight tracking-tight">
+            {{ __('Good afternoon, ') }}{{ Auth::user()->name ?? '' }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-[#111112] min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Total Email Lists -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center">
-                            <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Email Lists</div>
-                            <a href="{{ route('email-lists.create') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ $totalEmailLists }}</div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                @php
+                    $cards = [
+                        ['label' => 'Total Email Lists', 'value' => $totalEmailLists, 'route' => route('email-lists.create')],
+                        ['label' => 'Total Templates', 'value' => $totalTemplates, 'route' => route('email-templates.create')],
+                        ['label' => 'Total Campaigns', 'value' => $totalCampaigns, 'route' => route('campaigns.create')],
+                    ];
+                @endphp
 
-                <!-- Total Templates -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center">
-                            <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Templates</div>
-                            <a href="{{ route('email-templates.create') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ $totalTemplates }}</div>
+                @foreach($cards as $card)
+                    <div class="bg-[#18181b] rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center py-10 cursor-pointer group">
+                        <div class="text-white text-xl font-semibold mb-2 group-hover:text-gray-200 transition">{{ $card['label'] }}</div>
+                        <div class="text-4xl font-bold text-white mb-4">{{ $card['value'] }}</div>
+                        <a href="{{ $card['route'] }}" class="px-4 py-2 rounded-lg bg-white text-black font-semibold text-sm shadow hover:bg-gray-200 transition">Create</a>
                     </div>
-                </div>
-
-                <!-- Total Campaigns -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center">
-                            <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Campaigns</div>
-                            <a href="{{ route('campaigns.create') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{{ $totalCampaigns }}</div>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
             <!-- Campaign Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                @php
+                    $statusColors = [
+                        'pending' => 'bg-yellow-900 text-yellow-200',
+                        'processing' => 'bg-blue-900 text-blue-200',
+                        'completed' => 'bg-green-900 text-green-200',
+                        'failed' => 'bg-red-900 text-red-200'
+                    ];
+                @endphp
+
                 <!-- Overall Campaign Status -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Campaign Status Overview</h3>
-                            
-                        </div>
-                        <div class="space-y-4">
-                            @php
-                                $statusColors = [
-                                    'pending' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-                                    'processing' => 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200',
-                                    'completed' => 'bg-gray-300 text-gray-800 dark:bg-gray-500 dark:text-gray-200',
-                                    'failed' => 'bg-gray-400 text-gray-800 dark:bg-gray-400 dark:text-gray-200'
-                                ];
-                            @endphp
-                            @foreach(['pending', 'processing', 'completed', 'failed'] as $status)
-                                <div class="flex justify-between items-center">
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$status] }}">
-                                        {{ ucfirst($status) }}
-                                    </span>
-                                    <span class="text-gray-900 dark:text-white font-medium">
-                                        {{ $campaignStats[$status] ?? 0 }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
+                <div class="bg-[#18181b] rounded-2xl shadow-xl p-8">
+                    <h3 class="text-lg font-semibold text-white mb-6">Campaign Status Overview</h3>
+                    <div class="space-y-6">
+                        @foreach(['pending', 'processing', 'completed', 'failed'] as $status)
+                            <div class="flex justify-between items-center">
+                                <span class="px-4 py-2 text-base font-semibold rounded-full {{ $statusColors[$status] }}">
+                                    {{ ucfirst($status) }}
+                                </span>
+                                <span class="text-white font-bold text-lg">
+                                    {{ $campaignStats[$status] ?? 0 }}
+                                </span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 <!-- Monthly Statistics -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">This Month's Campaigns</h3>
-                            
-                        </div>
-                        <div class="space-y-4">
-                            @foreach(['pending', 'processing', 'completed', 'failed'] as $status)
-                                <div class="flex justify-between items-center">
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$status] }}">
-                                        {{ ucfirst($status) }}
-                                    </span>
-                                    <span class="text-gray-900 dark:text-white font-medium">
-                                        {{ $monthlyStats[$status] ?? 0 }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
+                <div class="bg-[#18181b] rounded-2xl shadow-xl p-8">
+                    <h3 class="text-lg font-semibold text-white mb-6">This Month's Campaigns</h3>
+                    <div class="space-y-6">
+                        @foreach(['pending', 'processing', 'completed', 'failed'] as $status)
+                            <div class="flex justify-between items-center">
+                                <span class="px-4 py-2 text-base font-semibold rounded-full {{ $statusColors[$status] }}">
+                                    {{ ucfirst($status) }}
+                                </span>
+                                <span class="text-white font-bold text-lg">
+                                    {{ $monthlyStats[$status] ?? 0 }}
+                                </span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
 
             <!-- Recent Campaigns -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Campaigns</h3>
-                       
-                    </div>
-                    <div class="space-y-4">
-                        @forelse($recentCampaigns as $campaign)
-                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div class="flex-1">
-                                    <div class="text-lg font-medium text-gray-900 dark:text-white">
-                                        {{ $campaign->subject }}
-                                    </div>
-                                    <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Template: {{ $campaign->template->name }} | 
-                                        List: {{ $campaign->emailList->name }} |
-                                        Created: {{ $campaign->created_at->format('M d, Y H:i') }}
-                                    </div>
-                                    <div class="mt-2">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $statusColors[$campaign->status] }}">
-                                            {{ ucfirst($campaign->status) }}
-                                        </span>
-                                    </div>
+            <div class="bg-[#18181b] rounded-2xl shadow-xl p-8">
+                <h3 class="text-lg font-semibold text-white mb-6">Recent Campaigns</h3>
+                <div class="space-y-4">
+                    @forelse($recentCampaigns as $campaign)
+                        <div class="flex items-center justify-between p-4 bg-[#232326] rounded-xl hover:bg-[#23232c] hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                            <div class="flex-1">
+                                <div class="text-lg font-semibold text-white">
+                                    {{ $campaign->subject }}
+                                </div>
+                                <div class="mt-1 text-sm text-gray-400">
+                                    Template: {{ $campaign->template->name }} | 
+                                    List: {{ $campaign->emailList->name }} |
+                                    Created: {{ $campaign->created_at->format('M d, Y H:i') }}
+                                </div>
+                                <div class="mt-2">
+                                    <span class="px-4 py-2 text-xs font-semibold rounded-full {{ $statusColors[$campaign->status] }}">
+                                        {{ ucfirst($campaign->status) }}
+                                    </span>
                                 </div>
                             </div>
-                        @empty
-                            <p class="text-center text-gray-500 dark:text-gray-400">No campaigns found.</p>
-                        @endforelse
-                    </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-gray-400">No campaigns found.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
